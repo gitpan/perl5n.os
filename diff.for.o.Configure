@@ -1,0 +1,92 @@
+*** Configure.my	Wed Nov 01 22:19:38 1995
+--- Configure	Thu Nov 02 01:31:28 1995
+***************
+*** 7860,7869 ****
+  '')	xxxfiles=`./findhdr signal.h` ;;
+  esac
+  xxx=`awk '
+! $1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $2 !~ /SIGARRAYSIZE/ {
+  	print substr($2, 4, 20)
+  }
+! $1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ {
+  	print substr($3, 4, 20)
+  }' $xxxfiles`
+  : Append some common names just in case the awk scan failed.
+--- 7860,7869 ----
+  '')	xxxfiles=`./findhdr signal.h` ;;
+  esac
+  xxx=`awk '
+! $1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $2 !~ /SIGARRAYSIZE/ && $3 !~ /void/ {
+  	print substr($2, 4, 20)
+  }
+! $1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ && $3 !~ /void/ {
+  	print substr($3, 4, 20)
+  }' $xxxfiles`
+  : Append some common names just in case the awk scan failed.
+***************
+*** 7887,7893 ****
+  	printf "}\n";
+  }
+  ' >signal.c
+! $cat >signal.cmd <<EOS
+  $startsh
+  $test -s signal.lst && exit 0
+  if $cc $ccflags signal.c -o signal $ldflags >/dev/null 2>&1; then
+--- 7887,7893 ----
+  	printf "}\n";
+  }
+  ' >signal.c
+! $cat >signal_cmd <<EOS
+  $startsh
+  $test -s signal.lst && exit 0
+  if $cc $ccflags signal.c -o signal $ldflags >/dev/null 2>&1; then
+***************
+*** 7906,7920 ****
+  fi
+  $rm -f signal.c signal signal.o
+  EOS
+! chmod a+x signal.cmd
+! $eunicefix signal.cmd
+  
+  : generate list of signal names
+  echo " "
+  case "$sig_name" in
+  '')
+  	echo "Generating a list of signal names..." >&4
+! 	./signal.cmd
+  	sig_name=`$awk '{printf "%s ", $1}' signal.lst`
+  	sig_name="ZERO $sig_name"
+  	;;
+--- 7906,7920 ----
+  fi
+  $rm -f signal.c signal signal.o
+  EOS
+! chmod a+x signal_cmd
+! $eunicefix signal_cmd
+  
+  : generate list of signal names
+  echo " "
+  case "$sig_name" in
+  '')
+  	echo "Generating a list of signal names..." >&4
+! 	./signal_cmd
+  	sig_name=`$awk '{printf "%s ", $1}' signal.lst`
+  	sig_name="ZERO $sig_name"
+  	;;
+***************
+*** 7941,7947 ****
+  case "$sig_num" in
+  '')
+  	echo "Generating a list of signal numbers..." >&4
+! 	./signal.cmd
+  	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
+  	sig_num="0 $sig_num"
+  	;;
+--- 7941,7947 ----
+  case "$sig_num" in
+  '')
+  	echo "Generating a list of signal numbers..." >&4
+! 	./signal_cmd
+  	sig_num=`$awk '{printf "%d ", $2}' signal.lst`
+  	sig_num="0 $sig_num"
+  	;;
